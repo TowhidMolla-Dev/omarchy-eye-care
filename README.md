@@ -6,6 +6,10 @@ An Omarchy shell plugin that helps you follow the **20-20-20 rule** against eye 
 - Fullscreen countdown + desktop notification on every break
 - Remaining time shown in the bar
 
+## Requirements
+
+No external dependencies beyond the default Omarchy install.
+
 ## What is the 20-20-20 rule?
 
 > Every 20 minutes, look at something 20 feet away for 20 seconds.
@@ -33,6 +37,12 @@ omarchy plugin list
 ```
 
 Also available from the menu: `Setup > Plugins > Enable / Disable`.
+
+### Removal
+
+```bash
+omarchy plugin remove usutani.eye-care
+```
 
 ### Pause / resume / skip (without disabling the plugin)
 
