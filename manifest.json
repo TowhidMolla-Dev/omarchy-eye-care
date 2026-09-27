@@ -4,6 +4,7 @@
   "name": "20-20-20 Eye Care",
   "version": "0.1.0",
   "author": "usutani",
+  "license": "MIT",
   "description": "20-20-20ルール (20分作業→20秒間・約6m先を見る) の休憩リマインダー。バー残時間表示と全画面カウントダウン付き。",
   "kinds": ["service", "bar-widget", "overlay"],
   "entryPoints": {
