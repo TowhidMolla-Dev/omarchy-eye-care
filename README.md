@@ -62,14 +62,17 @@ To verify the break behavior without waiting 20 minutes:
 
 1. Open the live copy at `~/.config/omarchy/plugins/usutani.eye-care/Service.qml` and
    temporarily shrink `workSeconds` / `restSeconds` (e.g. 60 / 10).
-   Saving hot-reloads the plugin (no restart needed).
+   Service code is only reloaded on a shell restart (service instances are kept
+   across `rescanPlugins`), so run `omarchy restart shell` afterwards.
+   The screen flickers briefly while the shell restarts.
 2. Check two full cycles against this list:
    - [ ] The "Rest your eyes" notification appears when work time runs out
    - [ ] The fullscreen countdown overlay opens
    - [ ] The overlay closes at zero with the "Break over" notification
    - [ ] The bar label returns to the work countdown
    - [ ] The overlay can be dismissed (outside click, Esc, "Back to work")
-3. When done, restore the production values (1200 / 20) and save to hot-reload.
+3. When done, restore the production values (1200 / 20) and run
+   `omarchy restart shell` again to pick them up.
 4. Make sure the repo copy at `~/Work/omarchy-eye-care/Service.qml` still holds
    the production values (do not leak the temporary change back into the repo).
 
