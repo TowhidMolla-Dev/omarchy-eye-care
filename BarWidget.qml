@@ -1,8 +1,8 @@
 import QtQuick
 import qs.Ui
 
-// バーの残り時間表示。タイマー実体は Service.qml が持ち、
-// ここは shell.serviceFor() 経由の読み取り専用表示 + 簡易操作。
+// Bar countdown display. The timer itself lives in Service.qml;
+// this is a read-only view plus quick controls via shell.serviceFor().
 BarWidget {
   id: root
   moduleName: "usutani.eye-care"
@@ -21,10 +21,10 @@ BarWidget {
     return m + ":" + (r < 10 ? "0" + r : "" + r)
   }
 
-  readonly property string labelText: (root.resting ? "休憩 " : "") + root.formatTime(root.remaining)
+  readonly property string labelText: (root.resting ? "Break " : "") + root.formatTime(root.remaining)
   readonly property string tooltipText: root.paused
-    ? "Eye Care: 一時停止中 (左クリックで再開、右クリックでスキップ)"
-    : (root.resting ? "Eye Care: 休憩中 — 6m先を見てください" : "Eye Care: 次の休憩まで " + root.formatTime(root.remaining) + " (左クリックで一時停止)")
+    ? "Eye Care: paused (left-click to resume, right-click to skip)"
+    : (root.resting ? "Eye Care: on a break — look far away" : "Eye Care: " + root.formatTime(root.remaining) + " until the next break (left-click to pause)")
 
   implicitWidth: button.implicitWidth
   implicitHeight: button.implicitHeight

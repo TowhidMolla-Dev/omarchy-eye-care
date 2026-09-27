@@ -2,21 +2,22 @@ import QtQuick
 import Quickshell
 import Quickshell.Io
 
-// 20-20-20ルールのタイマー本体 (single source of truth)。
-// 20分作業 → 20秒休憩 → 繰り返し。固定値 (記事通り厳密運用)。
-// BarWidget / Overlay は shell.serviceFor("usutani.eye-care") 経由で
-// このインスタンスを参照し、phase / remaining / paused を表示する。
+// Timer core for the 20-20-20 rule (single source of truth).
+// 20 minutes of work → 20 seconds of rest → repeat. Fixed values.
+// BarWidget / Overlay reference this instance via
+// shell.serviceFor("usutani.eye-care") and display phase / remaining / paused.
 Item {
   id: root
 
-  // omarchy-shell が注入するホスト参照。
+  // Injected by omarchy-shell.
   property var shell: null
   property var manifest: null
   property string omarchyPath: Quickshell.env("OMARCHY_PATH")
 
   readonly property string pluginId: "usutani.eye-care"
 
-  // 20-20-20ルール: 20分に1回、20秒間、20フィート (約6m) 先を見る。
+  // 20-20-20 rule: every 20 minutes, look at something
+  // 20 feet away for 20 seconds.
   readonly property int workSeconds: 1200
   readonly property int restSeconds: 20
 
@@ -55,17 +56,17 @@ Item {
   function startRest() {
     root.phase = "rest"
     root.remaining = root.restSeconds
-    root.notify("目を休めましょう", "20秒間、6m先を見て、意識して瞬きしてください")
+    root.notify("Rest your eyes", "Look 20 feet away for 20 seconds and blink consciously")
     root.summonOverlay()
   }
 
   function finishRest() {
     root.hideOverlay()
-    root.notify("お疲れさまです", "作業を再開できます")
+    root.notify("Break over", "You can get back to work")
     root.startWork()
   }
 
-  // 一時停止/再開の切り替え。プラグイン自体の enable/disable とは独立。
+  // Pause/resume toggle. Independent from the plugin's enable/disable state.
   function toggle() {
     root.paused = !root.paused
   }
@@ -78,7 +79,7 @@ Item {
     root.paused = true
   }
 
-  // 今の区間を飛ばす。work → 即休憩、rest → 即復帰。
+  // Skip the current phase. work → rest immediately, rest → back to work.
   function skip() {
     if (root.phase === "rest") root.finishRest()
     else root.startRest()

@@ -4,18 +4,19 @@ import Quickshell.Wayland
 import qs.Commons
 import qs.Ui
 
-// 20秒休憩の全画面カウントダウン overlay。
-// Service.qml が work 完了時に shell.summon() で開く。
-// 閉じられる (reminders準拠): カード外クリック・Esc・ボタンで中断し、
-// 中断時は Service.finishRest() 経由で次の work 周期へ進む。
+// Fullscreen 20-second break countdown overlay.
+// Service.qml opens it via shell.summon() when a work phase ends.
+// Dismissible (reminders-style): clicking outside the card, Esc, or the
+// button interrupts the break, and Service.finishRest() moves on to the
+// next work phase.
 Item {
   id: root
 
   property var shell: null
   property var manifest: null
-  // omarchy-shell が同プラグインの service エントリを注入する
-  // (shell.qml の panelEntries ローダーの契約)。service がまだ無い
-  // タイミングに備えて serviceFor 参照をフォールバックに使う。
+  // omarchy-shell injects the matching service singleton when the item
+  // declares a `service` property (panelEntries loader contract in shell.qml).
+  // Falls back to a serviceFor lookup in case the service is not loaded yet.
   property var service: null
 
   property bool opened: false
@@ -43,7 +44,8 @@ Item {
   }
 
   function dismiss() {
-    // 休憩中なら Service 側で復帰通知 + work 周期へ。そうでなければ閉じるだけ。
+    // On a break, let the Service announce the return and move to the
+    // next work phase. Otherwise just close.
     if (root.eyeService && String(root.eyeService.phase) === "rest") root.eyeService.finishRest()
     else if (root.shell && typeof root.shell.hide === "function")
       root.shell.hide("usutani.eye-care")
@@ -99,7 +101,7 @@ Item {
           textFormat: Text.PlainText
           width: parent.width
           horizontalAlignment: Text.AlignHCenter
-          text: "目を休めましょう"
+          text: "Rest your eyes"
           color: root.foreground
           font.family: Style.font.menuFamily
           font.pixelSize: Style.font.title
@@ -116,7 +118,7 @@ Item {
           text: root.countdown
         }
 
-        // 残り時間プログレスバー
+        // Remaining-time progress bar
         Rectangle {
           width: parent.width
           height: Style.space(8)
@@ -136,7 +138,7 @@ Item {
           width: parent.width
           horizontalAlignment: Text.AlignHCenter
           wrapMode: Text.WordWrap
-          text: "20秒間、6m先 (窓の外など) を見て、\n意識して瞬きしてください"
+          text: "For 20 seconds, look at something 20 ft away\n(e.g. outside the window) and blink consciously"
           color: root.foreground
           font.family: Style.font.menuFamily
           font.pixelSize: Style.font.body
@@ -148,7 +150,7 @@ Item {
           horizontalAlignment: Text.AlignHCenter
           wrapMode: Text.WordWrap
           opacity: 0.6
-          text: "画面との距離は 50〜60cm、画面は目線より下に"
+          text: "Keep the screen 50-60 cm away and below eye level"
           color: root.foreground
           font.family: Style.font.menuFamily
           font.pixelSize: Style.font.caption
@@ -156,7 +158,7 @@ Item {
 
         Button {
           anchors.horizontalCenter: parent.horizontalCenter
-          text: "作業に戻る"
+          text: "Back to work"
           onClicked: root.dismiss()
         }
 

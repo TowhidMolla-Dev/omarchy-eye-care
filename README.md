@@ -1,32 +1,30 @@
 # omarchy-eye-care
 
-Omarchy シェルプラグイン。眼精疲労対策の **20-20-20ルール** を支援します。
+An Omarchy shell plugin that helps you follow the **20-20-20 rule** against eye strain.
 
-- 20分作業 → 20秒休憩 → 繰り返し (固定値・記事通り厳密運用)
-- 休憩時は全画面カウントダウン + デスクトップ通知
-- バーに残り時間を表示
+- 20 minutes of work → 20 seconds of rest → repeat (fixed values)
+- Fullscreen countdown + desktop notification on every break
+- Remaining time shown in the bar
 
-## 20-20-20ルールとは
+## What is the 20-20-20 rule?
 
-> 20分に1回、20秒間、20フィート (約6m) 離れたところを見る。
+> Every 20 minutes, look at something 20 feet away for 20 seconds.
 
-出典: [眼精疲労対策（20-20-20ルール）| 古川中央眼科](https://www.eye-care.or.jp/sittoku/%E7%9C%BC%E7%B2%BE%E7%96%B2%E5%8A%B4%E5%AF%BE%E7%AD%96%EF%BC%8820-20-20%E3%83%AB%E3%83%BC%E3%83%AB%EF%BC%89/)
+Eye strain comes from the focusing muscles (mainly the ciliary muscle) getting tired
+from continuous near work. Looking far away at regular intervals lets them rest,
+which prevents fatigue.
 
-眼精疲労の正体は近くにピントを合わせる筋肉 (主に毛様体筋) の疲労であり、
-定期的に遠くを見て休ませることが予防になります。
-記事によれば時間・距離は厳密でなくて良く (30分/1時間でも、3mでもやらないより良い)、
-大切なのは近くを見る作業を連続させないことです。本プラグインは覚えやすい
-20分・20秒の固定値で運用します。
+Reference (in Japanese): [眼精疲労対策（20-20-20ルール）| 古川中央眼科](https://www.eye-care.or.jp/sittoku/%E7%9C%BC%E7%B2%BE%E7%96%B2%E5%8A%B4%E5%AF%BE%E7%AD%96%EF%BC%8820-20-20%E3%83%AB%E3%83%BC%E3%83%AB%EF%BC%89/)
 
-記事で紹介されている米国眼科学会の7つの提案のうち、本プラグインの
-メッセージに取り込んでいるもの:
+The break messages also borrow from the American Academy of Ophthalmology's
+recommendations for screen users:
 
-1. 作業中は意識して瞬きする
-2. 画面までの距離は腕を伸ばしたくらい (50〜60cm)、画面の高さは目線より下
+1. Blink consciously while working
+2. Keep the screen at arm's length (50-60 cm) and below eye level
 
-## 使い方
+## Usage
 
-### ON / OFF (永続・再起動後も維持)
+### Enable / disable (persistent across restarts)
 
 ```bash
 omarchy plugin disable usutani.eye-care
@@ -34,55 +32,55 @@ omarchy plugin enable usutani.eye-care --section right
 omarchy plugin list
 ```
 
-メニューからも可: `Setup > Plugins > Enable / Disable`。
+Also available from the menu: `Setup > Plugins > Enable / Disable`.
 
-### 一時停止 / 再開 / スキップ (プラグインは入れたまま)
+### Pause / resume / skip (without disabling the plugin)
 
-- バーの `󰈈 14:32` を左クリック: 一時停止 / 再開
-- バーを右クリック: 今の区間をスキップ (作業中→即休憩、休憩中→即復帰)
-- IPC でも可: `omarchy-shell eye-care toggle` / `stop` / `start` / `skip` / `status`
+- Left-click the `󰈈 14:32` label in the bar: pause / resume
+- Right-click the label: skip the current phase (work → break now, break → back to work)
+- Same via IPC: `omarchy-shell eye-care toggle` / `stop` / `start` / `skip` / `status`
 
-### 休憩 overlay について
+### About the break overlay
 
-20秒のカウントダウンは閉じることができます (カード外クリック・Esc・「作業に戻る」ボタン)。
-閉じると次の作業周期に入ります。
+The 20-second countdown can be dismissed (click outside the card, Esc, or the
+"Back to work" button). Dismissing it starts the next work phase.
 
-## 開発
+## Development
 
 ```bash
-# 検証 (公開前に必須)
+# Validate before publishing (required)
 omarchy plugin validate ~/Work/omarchy-eye-care
 
-# 手動配置 (開発中)
+# Manual install (while developing)
 mkdir -p ~/.config/omarchy/plugins/usutani.eye-care
 cp ~/Work/omarchy-eye-care/{manifest.json,Service.qml,BarWidget.qml,Overlay.qml} ~/.config/omarchy/plugins/usutani.eye-care/
 omarchy-shell shell rescanPlugins
 omarchy plugin enable usutani.eye-care --section right
 ```
 
-短時間での動作確認は以下の手順で行います (20分待たずに休憩動作を確認できます)。
+To verify the break behavior without waiting 20 minutes:
 
-1. 稼働側の `~/.config/omarchy/plugins/usutani.eye-care/Service.qml` を開き、
-   `workSeconds` / `restSeconds` を一時的に小さくします (例: 60 / 10)。
-   保存するとシェルが自動リロードします (再起動不要)。
-2. 次のチェックリストで2周分を確認します。
-   - [ ] 作業時間が尽きると通知「目を休めましょう」が出る
-   - [ ] 全画面カウントダウン overlay が開く
-   - [ ] カウントが 0 になると overlay が閉じて通知「お疲れさまです」が出る
-   - [ ] バー表示が作業時間に戻る
-   - [ ] overlay のカード外クリック・Esc・「作業に戻る」で中断できる
-3. 確認が終わったら値を本番値 (1200 / 20) に戻し、保存して自動リロードさせます。
-4. `~/Work/omarchy-eye-care/Service.qml` 側が本番値のままなのを確認します
-   (稼働側の一時変更を repo に逆流させないこと)。
+1. Open the live copy at `~/.config/omarchy/plugins/usutani.eye-care/Service.qml` and
+   temporarily shrink `workSeconds` / `restSeconds` (e.g. 60 / 10).
+   Saving hot-reloads the plugin (no restart needed).
+2. Check two full cycles against this list:
+   - [ ] The "Rest your eyes" notification appears when work time runs out
+   - [ ] The fullscreen countdown overlay opens
+   - [ ] The overlay closes at zero with the "Break over" notification
+   - [ ] The bar label returns to the work countdown
+   - [ ] The overlay can be dismissed (outside click, Esc, "Back to work")
+3. When done, restore the production values (1200 / 20) and save to hot-reload.
+4. Make sure the repo copy at `~/Work/omarchy-eye-care/Service.qml` still holds
+   the production values (do not leak the temporary change back into the repo).
 
-## ファイル構成
+## File layout
 
-| ファイル | 役割 |
+| File | Role |
 | --- | --- |
-| `manifest.json` | プラグイン定義 (`service` + `bar-widget` + `overlay`) |
-| `Service.qml` | タイマー本体 (真実の保持者)。1秒 `Timer` で `work` ⇄ `rest` を遷移 |
-| `BarWidget.qml` | バー残時間表示。`shell.serviceFor()` 経由の読み取り専用 + 簡易操作 |
-| `Overlay.qml` | 全画面20秒カウントダウン (`PanelWindow`, `WlrLayer.Overlay`) |
+| `manifest.json` | Plugin definition (`service` + `bar-widget` + `overlay`) |
+| `Service.qml` | Timer core (single source of truth). A 1-second `Timer` alternates `work` ⇄ `rest` |
+| `BarWidget.qml` | Bar countdown. Read-only view via `shell.serviceFor()` plus quick controls |
+| `Overlay.qml` | Fullscreen 20-second countdown (`PanelWindow`, `WlrLayer.Overlay`) |
 
 ## License
 
