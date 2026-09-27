@@ -60,8 +60,20 @@ omarchy-shell shell rescanPlugins
 omarchy plugin enable usutani.eye-care --section right
 ```
 
-短時間での動作確認は `Service.qml` の `workSeconds` / `restSeconds` を
-一時的に小さく (例: 60 / 10) して2周させ、確認後に本番値に戻してください。
+短時間での動作確認は以下の手順で行います (20分待たずに休憩動作を確認できます)。
+
+1. 稼働側の `~/.config/omarchy/plugins/usutani.eye-care/Service.qml` を開き、
+   `workSeconds` / `restSeconds` を一時的に小さくします (例: 60 / 10)。
+   保存するとシェルが自動リロードします (再起動不要)。
+2. 次のチェックリストで2周分を確認します。
+   - [ ] 作業時間が尽きると通知「目を休めましょう」が出る
+   - [ ] 全画面カウントダウン overlay が開く
+   - [ ] カウントが 0 になると overlay が閉じて通知「お疲れさまです」が出る
+   - [ ] バー表示が作業時間に戻る
+   - [ ] overlay のカード外クリック・Esc・「作業に戻る」で中断できる
+3. 確認が終わったら値を本番値 (1200 / 20) に戻し、保存して自動リロードさせます。
+4. `~/Work/omarchy-eye-care/Service.qml` 側が本番値のままなのを確認します
+   (稼働側の一時変更を repo に逆流させないこと)。
 
 ## ファイル構成
 
