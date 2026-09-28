@@ -22,15 +22,24 @@ Item {
   property bool opened: false
 
   readonly property var eyeService: root.service ? root.service : (shell ? shell.serviceFor("towhid.eye-care") : null)
+  readonly property bool done: !!(eyeService && eyeService.restDone)
   readonly property int restTotal: eyeService ? Number(eyeService.restSeconds) : 20
   readonly property int countdown: (eyeService && String(eyeService.phase) === "rest") ? Number(eyeService.remaining) : restTotal
   readonly property real progress: restTotal > 0 ? 1 - (countdown / restTotal) : 0
 
-  property color background: Color.menu.background
+  // The scrim is Color.background and menu.background resolves to the same
+  // value, so a menu-coloured card would vanish into it. Lift the card with
+  // a translucent foreground wash instead, which composites over the opaque
+  // scrim and keeps the surface readable.
+  property color background: Util.alpha(Color.foreground, 0.08)
   property color foreground: Color.menu.text
   property color border: Color.menu.border
   property var borderSpec: Border.surfaceSpec("menu", "border", border, Math.max(1, Style.space(2)))
-  property color scrim: Color.menu.scrim
+  // Opaque on purpose. The scrim used to be menu.scrim (background at
+  // 0.5 alpha) so a video kept playing behind a dimmed wash, which made
+  // the break easy to ignore. Color.background is fully opaque, so the
+  // break is an actual screen block and there is nothing left to watch.
+  property color scrim: Color.background
   readonly property int cornerRadius: Style.cornerRadius
   property int contentMargin: Style.spacing.panelPadding
 
@@ -101,7 +110,7 @@ Item {
           textFormat: Text.PlainText
           width: parent.width
           horizontalAlignment: Text.AlignHCenter
-          text: "Rest your eyes"
+          text: root.done ? "Break complete" : "Rest your eyes"
           color: root.foreground
           font.family: Style.font.menuFamily
           font.pixelSize: Style.font.title
@@ -115,7 +124,7 @@ Item {
           font.family: Style.font.menuFamily
           font.pixelSize: Style.font.displayLarge
           color: Color.accent
-          text: root.countdown
+          text: root.done ? "Done" : root.countdown
         }
 
         // Remaining-time progress bar
@@ -138,7 +147,9 @@ Item {
           width: parent.width
           horizontalAlignment: Text.AlignHCenter
           wrapMode: Text.WordWrap
-          text: "For 20 seconds, look at something 20 ft away\n(e.g. outside the window) and blink consciously"
+          text: root.done
+            ? "Take your time. The screen stays blocked until you close this."
+            : "For 20 seconds, look at something 20 ft away\n(e.g. outside the window) and blink consciously"
           color: root.foreground
           font.family: Style.font.menuFamily
           font.pixelSize: Style.font.body
@@ -150,7 +161,9 @@ Item {
           horizontalAlignment: Text.AlignHCenter
           wrapMode: Text.WordWrap
           opacity: 0.6
-          text: "Keep the screen 50-60 cm away and below eye level"
+          text: root.done
+            ? "Click anywhere, or press Esc, to go back to work"
+            : "Keep the screen 50-60 cm away and below eye level"
           color: root.foreground
           font.family: Style.font.menuFamily
           font.pixelSize: Style.font.caption
@@ -158,7 +171,7 @@ Item {
 
         Button {
           anchors.horizontalCenter: parent.horizontalCenter
-          text: "Back to work"
+          text: root.done ? "Back to work" : "Skip break"
           onClicked: root.dismiss()
         }
 

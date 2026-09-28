@@ -50,6 +50,11 @@ Item {
   // "work" | "rest"
   property string phase: "work"
   property int remaining: workSeconds
+  // The rest countdown has run out but the overlay is still up, waiting
+  // for a deliberate dismiss. The break is a full-screen block now, so it
+  // must not vanish on its own: if the user stepped away mid-break, an
+  // auto-dismiss would hand the screen straight back before they saw it.
+  property bool restDone: false
   property bool paused: false
 
   function formatTime(totalSeconds) {
@@ -99,6 +104,7 @@ Item {
 
   function startRest() {
     root.phase = "rest"
+    root.restDone = false
     // The rest countdown is a plain 20-second counter, not a deadline:
     // it is far too short to be worth resuming, and the overlay reads
     // `remaining` directly for its countdown.
@@ -165,9 +171,12 @@ Item {
       return
     }
 
+    // Latch at zero. The overlay stays up and keeps the screen blocked
+    // until the user dismisses it, which is what calls finishRest().
+    if (root.restDone) return
     root.remaining -= 1
     if (root.remaining > 0) return
-    root.finishRest()
+    root.restDone = true
   }
 
   Timer {
@@ -292,6 +301,7 @@ Item {
       display: root.formatTime(root.remaining),
       deadline: root.deadline,
       paused: root.paused,
+      restDone: root.restDone,
       barMode: root.barMode,
       progress: Math.round(root.progress * 1000) / 1000
     })
