@@ -54,7 +54,8 @@ BarWidget {
 
   readonly property string tooltipText: root.paused
     ? "Eye Care: paused (left-click to resume, right-click to skip)"
-    : (root.resting ? "Eye Care: on a break — look far away" : "Eye Care: " + root.formatTime(root.remaining) + " until the next break (left-click to pause)")
+    : (root.resting ? "Eye Care: on a break — look far away (left-click to pause)"
+      : "Eye Care: " + root.formatTime(root.remaining) + " until the next break (left-click to pause, middle-click for settings)")
 
   implicitWidth: button.implicitWidth
   implicitHeight: button.implicitHeight
@@ -107,7 +108,8 @@ BarWidget {
     onPressed: function(b) {
       if (!root.eyeService) return
       if (b === Qt.RightButton) root.eyeService.skip()
-      else root.toggle()
+      else if (b === Qt.MiddleButton) root.open()
+      else root.eyeService.toggle()
     }
   }
 
