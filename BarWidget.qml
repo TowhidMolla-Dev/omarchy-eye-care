@@ -27,7 +27,8 @@ BarWidget {
   // own hit area out from under the pointer and re-enters immediately.
   property bool pointerInside: false
   property bool showTimer: false
-  readonly property bool hovered: compact ? false : (showTimer || pointerInside)
+  readonly property bool hovered: compact ? false
+    : (showTimer || pointerInside || (panelLoader.item ? panelLoader.item.opened : false))
 
   Timer {
     id: collapseDelay
@@ -116,6 +117,22 @@ BarWidget {
       if (b === Qt.RightButton) root.eyeService.skip()
       else if (b === Qt.MiddleButton) root.open()
       else root.eyeService.toggle()
+    }
+  }
+
+  // Middle click is handled here, on press, instead of relying on
+  // WidgetButton's onClicked -- that fires only when the press *and* the
+  // release land inside the item. In hover mode this widget animates its
+  // width as the pointer enters, so a click that straddles the animation
+  // releases outside the resized item and onClicked is cancelled: the
+  // settings silently never opened. Only the middle button is accepted, so
+  // left and right clicks still fall through to the button below.
+  MouseArea {
+    anchors.fill: parent
+    acceptedButtons: Qt.MiddleButton
+    onPressed: {
+      console.log("EYEDIAG middle press; widgetWidth=" + root.width)
+      root.open()
     }
   }
 
