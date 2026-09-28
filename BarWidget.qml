@@ -67,7 +67,13 @@ BarWidget {
     visible: false
 
     onLoaded: {
-      panelLoader.item.bar = root.bar
+      // Bind, do not assign. The Bar is attached to this widget *after*
+      // this handler runs, so a one-shot `= root.bar` captured null and
+      // the panel could never reach the service: every control fell back
+      // to its default and the mode chips ignored clicks. Qt.binding
+      // re-evaluates as soon as the source property changes.
+      panelLoader.item.bar = Qt.binding(function() { return root.bar })
+      panelLoader.item.service = Qt.binding(function() { return root.eyeService })
       panelLoader.item.anchorItem = button
       panelLoader.item.hostWidget = root
     }
