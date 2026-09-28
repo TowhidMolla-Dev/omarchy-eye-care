@@ -1,6 +1,20 @@
 MIT License
 
 Copyright (c) 2026 usutani
+Copyright (c) 2026 Towhid Molla (modifications, see below)
+
+This is a fork of https://github.com/usutani/omarchy-eye-care, which is MIT
+licensed and copyright (c) 2026 usutani. The original copyright above is
+retained; the modifications below are distributed under the same terms.
+
+Modifications by Towhid Molla:
+  - Persist the work countdown as an absolute wall-clock deadline, so the
+    timer survives `omarchy restart shell` and a shell crash instead of
+    restarting the 20-minute interval.
+  - Derive the displayed countdown from the clock rather than decrementing
+    it per tick, which also removes drift.
+  - Re-ID the plugin from `usutani.eye-care` to `towhid.eye-care`.
+  - README updates.
 
 Permission is hereby granted, free of charge, to any person obtaining a copy
 of this software and associated documentation files (the "Software"), to deal

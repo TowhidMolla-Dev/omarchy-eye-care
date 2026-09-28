@@ -1,10 +1,16 @@
 # omarchy-eye-care
 
+> **This is a fork of [`usutani/omarchy-eye-care`](https://github.com/usutani/omarchy-eye-care)
+> (MIT, © 2026 usutani).** The only substantive change is that the countdown
+> survives a shell restart. Install the original instead if you don't need that.
+> See [What changed](#what-changed) below.
+
 An Omarchy shell plugin that helps you follow the **20-20-20 rule** against eye strain.
 
 - 20 minutes of work → 20 seconds of rest → repeat (fixed values)
 - Fullscreen countdown + desktop notification on every break
 - Remaining time shown in the bar
+- The countdown survives `omarchy restart shell` and shell crashes
 
 ## Requirements
 
@@ -28,11 +34,41 @@ recommendations for screen users:
 
 ## Usage
 
+### Bar display: full, ring, or hover
+
+Two health timers on one bar is a lot of pixels, so the bar widget has three
+display modes, chosen in the settings panel (left-click the widget) and saved
+across restarts.
+
+| Mode | Shows | Width |
+|---|---|---|
+| `Full` | Icon and countdown, as upstream | ~67px |
+| `Ring` (default) | Icon inside a ring that fills as the 20 minutes run | ~29px |
+| `Hover` | Icon until you hover it, then the countdown slides in | 29px → 67px |
+
+`Ring` is the default because a countdown's value is that you can read it
+*without* pointing at it. Hiding the number behind a hover would mean you have
+to hover every single time you want to know, which is strictly worse than a
+number that is always there — and with two such widgets, every sweep of the
+pointer across the bar would reflow the layout twice. The ring answers "how
+long until my break?" in a glance instead, and its colour turns urgent when
+the timer is paused.
+
+The full status is always on the tooltip, so `Ring` costs you nothing but
+width. `Hover` is there for people who prefer the bar to stay visually quiet
+until they ask for it.
+
+You can also set the mode over IPC:
+
+```bash
+omarchy-shell eye-care mode ring     # full | compact | hover
+```
+
 ### Enable / disable (persistent across restarts)
 
 ```bash
-omarchy plugin disable usutani.eye-care
-omarchy plugin enable usutani.eye-care --section right
+omarchy plugin disable towhid.eye-care
+omarchy plugin enable towhid.eye-care --section right
 omarchy plugin list
 ```
 
@@ -41,7 +77,7 @@ Also available from the menu: `Setup > Plugins > Enable / Disable`.
 ### Removal
 
 ```bash
-omarchy plugin remove usutani.eye-care
+omarchy plugin remove towhid.eye-care
 ```
 
 ### Pause / resume / skip (without disabling the plugin)
@@ -55,6 +91,37 @@ omarchy plugin remove usutani.eye-care
 The 20-second countdown can be dismissed (click outside the card, Esc, or the
 "Back to work" button). Dismissing it starts the next work phase.
 
+## What changed
+
+Everything here except `Service.qml`'s timer core is unchanged from upstream.
+
+The original counted down with `remaining -= 1` from a property initializer, so
+every shell start re-ran it and the 20-minute interval began again. This fork
+stores an absolute wall-clock **deadline** instead and derives the display from
+`Date.now()`, so a restart resumes where the countdown actually was. Deriving
+rather than decrementing also removes per-tick drift.
+
+The deadline is written to
+`$XDG_STATE_HOME/omarchy/towhid.eye-care/timer.json`, and only when the work
+phase is armed or paused — a few writes per 20-minute cycle, not one per second.
+
+Behaviour at the edges:
+
+- **Paused** before a restart → comes back still paused, at the same remaining time.
+- **Deadline elapsed while the shell was down** (hours later, after a reboot) →
+  starts a fresh 20-minute phase rather than firing a stale eye break at login.
+- **A break interrupted by the restart** → not resumed; the 20-second rest is
+  too short to be worth replaying.
+- The `eye-care` IPC target is unchanged, so the documented
+  `omarchy-shell eye-care ...` commands still work. Because that target is
+  shared with upstream, do not run this fork and `usutani.eye-care` at the same
+  time.
+
+One implementation trap worth knowing if you extend this: the deadline property
+must be declared `double`, not `int`. A millisecond epoch is around `1.79e12`
+and silently overflows a 32-bit QML `int` (max `~2.1e9`), which makes every
+restored countdown read as already expired.
+
 ## Development
 
 ```bash
@@ -62,15 +129,15 @@ The 20-second countdown can be dismissed (click outside the card, Esc, or the
 omarchy plugin validate ~/Work/omarchy-eye-care
 
 # Manual install (while developing)
-mkdir -p ~/.config/omarchy/plugins/usutani.eye-care
-cp ~/Work/omarchy-eye-care/{manifest.json,Service.qml,BarWidget.qml,Overlay.qml} ~/.config/omarchy/plugins/usutani.eye-care/
+mkdir -p ~/.config/omarchy/plugins/towhid.eye-care
+cp ~/Work/omarchy-eye-care/{manifest.json,Service.qml,BarWidget.qml,Overlay.qml} ~/.config/omarchy/plugins/towhid.eye-care/
 omarchy-shell shell rescanPlugins
-omarchy plugin enable usutani.eye-care --section right
+omarchy plugin enable towhid.eye-care --section right
 ```
 
 To verify the break behavior without waiting 20 minutes:
 
-1. Open the live copy at `~/.config/omarchy/plugins/usutani.eye-care/Service.qml` and
+1. Open the live copy at `~/.config/omarchy/plugins/towhid.eye-care/Service.qml` and
    temporarily shrink `workSeconds` / `restSeconds` (e.g. 60 / 10).
    Service code is only reloaded on a shell restart (service instances are kept
    across `rescanPlugins`), so run `omarchy restart shell` afterwards.
@@ -97,4 +164,4 @@ To verify the break behavior without waiting 20 minutes:
 
 ## License
 
-MIT
+MIT — see [LICENSE](LICENSE), which retains the original © 2026 usutani copyright.

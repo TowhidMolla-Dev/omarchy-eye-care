@@ -21,7 +21,7 @@ Item {
 
   property bool opened: false
 
-  readonly property var eyeService: root.service ? root.service : (shell ? shell.serviceFor("usutani.eye-care") : null)
+  readonly property var eyeService: root.service ? root.service : (shell ? shell.serviceFor("towhid.eye-care") : null)
   readonly property int restTotal: eyeService ? Number(eyeService.restSeconds) : 20
   readonly property int countdown: (eyeService && String(eyeService.phase) === "rest") ? Number(eyeService.remaining) : restTotal
   readonly property real progress: restTotal > 0 ? 1 - (countdown / restTotal) : 0
@@ -48,7 +48,7 @@ Item {
     // next work phase. Otherwise just close.
     if (root.eyeService && String(root.eyeService.phase) === "rest") root.eyeService.finishRest()
     else if (root.shell && typeof root.shell.hide === "function")
-      root.shell.hide("usutani.eye-care")
+      root.shell.hide("towhid.eye-care")
     else root.opened = false
   }
 
@@ -62,7 +62,7 @@ Item {
     visible: root.opened
     anchors { top: true; bottom: true; left: true; right: true }
     color: "transparent"
-    WlrLayershell.namespace: "usutani-eye-care"
+    WlrLayershell.namespace: "towhid-eye-care"
     WlrLayershell.layer: WlrLayer.Overlay
     WlrLayershell.keyboardFocus: WlrKeyboardFocus.Exclusive
     exclusionMode: ExclusionMode.Ignore
