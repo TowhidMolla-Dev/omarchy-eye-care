@@ -23,9 +23,11 @@ Panel {
 
   readonly property color fg: root.barForeground
 
-  function open() {
-    if (panel.item) panel.item.open()
-  }
+  // open/close/toggle are inherited from Panel, which drives the
+  // KeyboardPanel through `open: root.opened` -> panelController.show().
+  // Do not redefine open() here: an earlier version shadowed the base
+  // implementation with a no-op that looked for panel.item, so the panel
+  // never actually opened.
 
   KeyboardPanel {
     id: panel

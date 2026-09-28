@@ -2,7 +2,7 @@
   "schemaVersion": 1,
   "id": "towhid.eye-care",
   "name": "20-20-20 Eye Care",
-  "version": "0.3.1",
+  "version": "0.3.2",
   "author": "Towhid Molla (fork of usutani.eye-care)",
   "license": "MIT",
   "description": "20-20-20 rule break reminder: every 20 minutes, look 20 feet away for 20 seconds. With bar countdown and fullscreen overlay. The countdown survives a shell restart.",
